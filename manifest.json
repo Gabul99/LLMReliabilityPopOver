@@ -6,7 +6,9 @@
   "permissions": ["webRequest", "activeTab"],
   "host_permissions": ["*://*/*"],
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "./popup/build/index.html",
+    "default_width": 320,
+    "default_height": 640,
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
