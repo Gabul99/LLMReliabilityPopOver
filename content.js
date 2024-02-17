@@ -1,3 +1,5 @@
+let innerText = "Did you get a reliable answer from ChatGPT?";
+
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   console.log("Get message", message.action);
   if (message.action === "showSnackbar") {
@@ -19,7 +21,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
           gap: 8px;
       `;
     let innerStatement = document.createElement("p");
-    innerStatement.textContent = "Did you get a reliable answer from ChatGPT?";
+    innerStatement.id = "innerStatement";
+    innerStatement.textContent = innerText;
     innerStatement.style = `color: white; margin-right: 40px; font-size: 14px`;
     snackbar.appendChild(innerStatement);
 
@@ -52,5 +55,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     yesButton.onclick = closeSnackbar;
     noButton.onclick = closeSnackbar;
     document.body.appendChild(snackbar);
+  } else if (message.action === "changeText") {
+    const { newText } = message;
+    innerText = newText;
+    let innerStatement = document.getElementById("innerStatement");
+    if (innerStatement) innerStatement.textContent = newText;
   }
 });
