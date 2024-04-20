@@ -19,3 +19,15 @@
   padding: 16px 0;
   font-size: 20px;
 }
+
+.log-button {
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background-color: black;
+  border-radius: 4px;
+  width: fit-content;
+}

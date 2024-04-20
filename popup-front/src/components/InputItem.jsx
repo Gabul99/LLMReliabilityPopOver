@@ -3,9 +3,7 @@ import "./InputItem.css";
 import MessageManager from "../message/MessageManager";
 
 const InputItem = () => {
-  const [text, setText] = useState(
-    "Did you get a reliable answer from ChatGPT?"
-  );
+  const [text, setText] = useState("Did you get a reliable answer?");
 
   const saveText = () => {
     const msgManager = new MessageManager();

@@ -1,14 +1,15 @@
-let innerText = "Did you get a reliable answer from ChatGPT?";
+let innerText = "Did you get a reliable answer?";
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   console.log("Get message", message.action);
   if (message.action === "showSnackbar") {
-    // Add your code here to show the UI component
-    // For example, you can inject HTML/CSS to create a snackbar
+    const site = message.site;
+
+    // Snackbar Styling
     var snackbar = document.createElement("div");
     snackbar.style = `
           position: fixed;
-          bottom: 102px;
+          bottom: ${site === "Gemini" ? "112px" : "102px"};
           right: 32px;
           background-color: #000000;
           color: white;
@@ -50,10 +51,90 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     `;
     snackbar.appendChild(noButton);
 
-    const closeSnackbar = () => snackbar.remove();
+    const closeSnackbar = (answer) => {
+      if (site === "Gemini") {
+        const modelTurns = Array.from(
+          document.querySelectorAll('[id^="message-content-id-"]')
+        );
+        const userTurns = Array.from(
+          document.querySelectorAll('[id^="user-query-content-"]')
+        );
+        const recentTurns = [
+          userTurns.pop().outerHTML,
+          modelTurns.pop().outerHTML,
+        ];
+        const previousData = localStorage.getItem("gptReliableExtLogs");
+        // localStorage.setItem(
+        //   "gptReliableExtLogs",
+        //   JSON.stringify([
+        //     ...(JSON.parse(previousData) ?? []),
+        //     {
+        //       userAnswer: answer,
+        //       site,
+        //       time: new Date().toISOString(),
+        //       turns: recentTurns,
+        //     },
+        //   ])
+        // );
+        chrome.runtime.sendMessage(
+          undefined,
+          {
+            action: "saveLogs",
+            log: {
+              userAnswer: answer,
+              site,
+              time: new Date().toISOString(),
+              turns: recentTurns,
+            },
+          },
+          undefined,
+          () => {}
+        );
+      } else {
+        const turns = document.querySelectorAll(
+          '[data-testid^="conversation-turn-"]'
+        );
+        const recentTurns = Array.from(turns)
+          .slice(-2)
+          .map(
+            (t) =>
+              t.querySelector(
+                '[data-message-author-role="user"], [data-message-author-role="assistant"]'
+              ).outerHTML
+          );
+        // const previousData = localStorage.getItem("gptReliableExtLogs");
+        // localStorage.setItem(
+        //   "gptReliableExtLogs",
+        //   JSON.stringify([
+        //     ...(JSON.parse(previousData) ?? []),
+        //     {
+        //       userAnswer: answer,
+        //       site,
+        //       time: new Date().toISOString(),
+        //       turns: recentTurns,
+        //     },
+        //   ])
+        // );
+        chrome.runtime.sendMessage(
+          undefined,
+          {
+            action: "saveLogs",
+            log: {
+              userAnswer: answer,
+              site,
+              time: new Date().toISOString(),
+              turns: recentTurns,
+            },
+          },
+          undefined,
+          () => {}
+        );
+      }
+      snackbar.remove();
+    };
 
-    yesButton.onclick = closeSnackbar;
-    noButton.onclick = closeSnackbar;
+    yesButton.onclick = () => closeSnackbar("YES");
+    noButton.onclick = () => closeSnackbar("NO");
     document.body.appendChild(snackbar);
   } else if (message.action === "changeText") {
     const { newText } = message;

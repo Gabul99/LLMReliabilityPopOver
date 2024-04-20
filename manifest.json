@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "GPT Reliable Extension",
-  "description": "ChatGPT Reliable Popover Extension for Research",
-  "version": "1.0",
-  "permissions": ["webRequest", "activeTab"],
+  "description": "ChatGPT and Google Gemini Reliable Popover Extension for Research",
+  "version": "0.1",
+  "permissions": ["webRequest", "activeTab", "storage", "downloads"],
   "host_permissions": ["*://*/*"],
   "action": {
     "default_popup": "./popup/build/index.html",
@@ -27,7 +27,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://chat.openai.com/c/*"],
+      "matches": ["*://chat.openai.com/c/*", "*://gemini.google.com/app/*"],
       "js": ["content.js"]
     }
   ]
