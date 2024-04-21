@@ -1,4 +1,5 @@
 console.log("Service worker");
+// Intercept network requests and send message to content script if needed.
 chrome.webRequest.onCompleted.addListener(
   async function (details) {
     if (details.initiator && details.initiator.includes("openai.com")) {
@@ -36,6 +37,7 @@ chrome.webRequest.onCompleted.addListener(
   { urls: ["<all_urls>"] }
 );
 
+// Generate log files and download.
 function getStorageAndDownload(key) {
   chrome.storage.local.get(key, function (data) {
     if (data) {
@@ -65,6 +67,7 @@ function getStorageAndDownload(key) {
   });
 }
 
+// Receive saveLogs message and download the logs.
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   console.log("Get message in runtime!", message);
   if (message.action === "saveLogs") {

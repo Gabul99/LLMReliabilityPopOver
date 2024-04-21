@@ -51,6 +51,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     `;
     snackbar.appendChild(noButton);
 
+    // When close snackbar, it sends log data to service worker.
     const closeSnackbar = (answer) => {
       if (site === "Gemini") {
         const modelTurns = Array.from(
@@ -63,19 +64,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
           userTurns.pop().outerHTML,
           modelTurns.pop().outerHTML,
         ];
-        const previousData = localStorage.getItem("gptReliableExtLogs");
-        // localStorage.setItem(
-        //   "gptReliableExtLogs",
-        //   JSON.stringify([
-        //     ...(JSON.parse(previousData) ?? []),
-        //     {
-        //       userAnswer: answer,
-        //       site,
-        //       time: new Date().toISOString(),
-        //       turns: recentTurns,
-        //     },
-        //   ])
-        // );
         chrome.runtime.sendMessage(
           undefined,
           {
@@ -102,19 +90,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 '[data-message-author-role="user"], [data-message-author-role="assistant"]'
               ).outerHTML
           );
-        // const previousData = localStorage.getItem("gptReliableExtLogs");
-        // localStorage.setItem(
-        //   "gptReliableExtLogs",
-        //   JSON.stringify([
-        //     ...(JSON.parse(previousData) ?? []),
-        //     {
-        //       userAnswer: answer,
-        //       site,
-        //       time: new Date().toISOString(),
-        //       turns: recentTurns,
-        //     },
-        //   ])
-        // );
         chrome.runtime.sendMessage(
           undefined,
           {
