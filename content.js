@@ -1,9 +1,18 @@
-let innerText = "Did you get a reliable answer?";
+function colorTag(colorName) {
+  switch (colorName) {
+    case "black":
+      return "#000000";
+    case "red":
+      return "#FF5C5C";
+  }
+}
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   console.log("Get message", message.action);
   if (message.action === "showSnackbar") {
     const site = message.site;
+    const { backgroundColor, popoverText } = message.style;
+    const colorHashCode = colorTag(backgroundColor);
 
     // Snackbar Styling
     var snackbar = document.createElement("div");
@@ -11,7 +20,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
           position: fixed;
           bottom: ${site === "Gemini" ? "112px" : "102px"};
           right: 32px;
-          background-color: #000000;
+          background-color: ${colorHashCode};
           color: white;
           padding: 16px;
           border-radius: 8px;
@@ -21,9 +30,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
           align-items: center;
           gap: 8px;
       `;
+    snackbar.id = "extensionSnackbar";
     let innerStatement = document.createElement("p");
     innerStatement.id = "innerStatement";
-    innerStatement.textContent = innerText;
+    innerStatement.textContent = popoverText;
     innerStatement.style = `color: white; margin-right: 40px; font-size: 14px`;
     snackbar.appendChild(innerStatement);
 
@@ -110,11 +120,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
     yesButton.onclick = () => closeSnackbar("YES");
     noButton.onclick = () => closeSnackbar("NO");
+    // Snackbar Injection to DOM
     document.body.appendChild(snackbar);
-  } else if (message.action === "changeText") {
-    const { newText } = message;
-    innerText = newText;
+  } else if (message.action === "updateStyle") {
+    const { popoverStyle } = message;
+    const { popoverText, backgroundColor } = popoverStyle;
     let innerStatement = document.getElementById("innerStatement");
-    if (innerStatement) innerStatement.textContent = newText;
+    if (innerStatement) innerStatement.textContent = popoverText;
+    let snackbar = document.getElementById("extensionSnackbar");
+    if (snackbar) snackbar.style.backgroundColor = colorTag(backgroundColor);
   }
 });

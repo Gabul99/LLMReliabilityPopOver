@@ -2,12 +2,10 @@ import { useState } from "react";
 import "./InputItem.css";
 import MessageManager from "../message/MessageManager";
 
-const InputItem = () => {
-  const [text, setText] = useState("Did you get a reliable answer?");
-
+const InputItem = ({ text, setText }) => {
   const saveText = () => {
     const msgManager = new MessageManager();
-    msgManager.sendMessage({ action: "changeText", newText: text });
+    msgManager.sendMessageToRuntime({ action: "changeStyle", newText: text });
   };
 
   return (

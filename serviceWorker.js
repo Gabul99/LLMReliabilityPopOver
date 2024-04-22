@@ -1,7 +1,27 @@
 console.log("Service worker");
+let popoverStyle;
+
+// Load the popover style from local storage.
+// If there is no data, set default data.
+function initialize() {
+  chrome.storage.local.get("popoverStyle", (data) => {
+    if (Object.keys(data).length !== 2) {
+      popoverStyle = {
+        backgroundColor: "black",
+        popoverText: "Did you get a reliable answer?",
+      };
+      chrome.storage.local.set(popoverStyle);
+    } else {
+      popoverStyle = data.popoverStyle;
+    }
+  });
+}
+initialize();
+
 // Intercept network requests and send message to content script if needed.
 chrome.webRequest.onCompleted.addListener(
   async function (details) {
+    // check this request from ChatGPT
     if (details.initiator && details.initiator.includes("openai.com")) {
       if (details.url.endsWith("backend-api/conversation")) {
         console.log("Send Message!");
@@ -10,13 +30,14 @@ chrome.webRequest.onCompleted.addListener(
             chrome.tabs.sendMessage(details.tabId, {
               action: "showSnackbar",
               site: "ChatGPT",
+              style: popoverStyle,
             }),
           5000
         );
       }
     }
+    // check this request from Google Gemini
     if (details.initiator && details.initiator.includes("gemini.google.com")) {
-      console.log(details.url);
       if (
         details.url.includes(
           "assistant.lamda.BardFrontendService/StreamGenerate"
@@ -28,6 +49,7 @@ chrome.webRequest.onCompleted.addListener(
             chrome.tabs.sendMessage(details.tabId, {
               action: "showSnackbar",
               site: "Gemini",
+              style: popoverStyle,
             }),
           5000
         );
@@ -46,6 +68,7 @@ function getStorageAndDownload(key) {
 
       const blob = new Blob([textData], { type: "application/json" });
       const reader = new FileReader();
+      // this 'onload' closure is triggered when readAsArrayBuffer called.
       reader.onload = (event) => {
         const dataUri = event.target.result;
         const blobUrl = `data:application/json;base64,${btoa(
@@ -54,6 +77,7 @@ function getStorageAndDownload(key) {
             ""
           )
         )}`;
+        // Trigger to download
         chrome.downloads.download({
           url: blobUrl,
           filename: key + "-log-data.json",
@@ -85,7 +109,31 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       chrome.storage.local.set(newLog);
     });
   } else if (message.action === "downloadLogs") {
+    // When download logs button is clicked
     getStorageAndDownload("gemeniReliableExtLogs");
     getStorageAndDownload("gptReliableExtLogs");
+  } else if (message.action === "changeStyle") {
+    // When the color or text is changed in popup.
+    const { newText, newColor } = message;
+    console.log("Change Style", message);
+    // If newColor or newText is undefined, existing value is included for new popover style.
+    popoverStyle = {
+      backgroundColor: newColor ?? popoverStyle.backgroundColor,
+      popoverText: newText ?? popoverStyle.popoverText,
+    };
+    chrome.storage.local.set({
+      popoverStyle,
+    });
+    chrome.runtime.sendMessage(
+      undefined,
+      {
+        action: "updateStyle",
+        popoverStyle,
+      },
+      undefined,
+      () => {}
+    );
+  } else if (message.action === "getCurrentStyle") {
+    sendResponse({ popoverStyle });
   }
 });
