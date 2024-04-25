@@ -3,20 +3,22 @@ let popoverStyle;
 
 // Load the popover style from local storage.
 // If there is no data, set default data.
-function initialize() {
+function initialize(completeHandler) {
   chrome.storage.local.get("popoverStyle", (data) => {
-    if (Object.keys(data).length !== 2) {
+    if (Object.keys(data).length === 0) {
       popoverStyle = {
         backgroundColor: "black",
-        popoverText: "Did you get a reliable answer?",
+        popoverText:
+          "Always verify facts by checking multiple reputable sources for accuracy.",
       };
       chrome.storage.local.set(popoverStyle);
     } else {
       popoverStyle = data.popoverStyle;
     }
+    completeHandler();
   });
 }
-initialize();
+initialize(() => {});
 
 // Intercept network requests and send message to content script if needed.
 chrome.webRequest.onCompleted.addListener(
@@ -105,7 +107,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       console.log(key, storage);
       const newLog = {};
       newLog[key] = [...(storage[key] ?? []), logData];
-      console.log(newLog);
       chrome.storage.local.set(newLog);
     });
   } else if (message.action === "downloadLogs") {
@@ -115,7 +116,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   } else if (message.action === "changeStyle") {
     // When the color or text is changed in popup.
     const { newText, newColor } = message;
-    console.log("Change Style", message);
     // If newColor or newText is undefined, existing value is included for new popover style.
     popoverStyle = {
       backgroundColor: newColor ?? popoverStyle.backgroundColor,
@@ -134,6 +134,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       () => {}
     );
   } else if (message.action === "getCurrentStyle") {
-    sendResponse({ popoverStyle });
+    if (popoverStyle === undefined) {
+      initialize(() => {
+        sendResponse(popoverStyle);
+      });
+    } else {
+      sendResponse(popoverStyle);
+    }
   }
 });

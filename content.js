@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
           border-radius: 8px;
           z-index: 9999;
           display: flex;
-          flex-direction: row;
+          flex-direction: column;
           align-items: center;
           gap: 8px;
       `;
@@ -34,11 +34,21 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     let innerStatement = document.createElement("p");
     innerStatement.id = "innerStatement";
     innerStatement.textContent = popoverText;
-    innerStatement.style = `color: white; margin-right: 40px; font-size: 14px`;
+    innerStatement.style = `max-width: 360px; color: white; font-size: 14px; word-wrap:break-word;`;
     snackbar.appendChild(innerStatement);
 
+    let buttonContainer = document.createElement("div");
+    buttonContainer.style = `
+          width: fit-content;
+          display: flex;
+          flex-direction: row;
+          margin-left: auto;
+          gap: 8px;
+          align-items: center;
+    `;
+
     let yesButton = document.createElement("div");
-    yesButton.textContent = "YES";
+    yesButton.textContent = "Let’s fact-check now";
     yesButton.style.cssText = `
           color: yellow;
           font-size: 14px;
@@ -47,10 +57,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
           border-radius: 4px;
           cursor: pointer;
     `;
-    snackbar.appendChild(yesButton);
+    buttonContainer.appendChild(yesButton);
 
     let noButton = document.createElement("div");
-    noButton.textContent = "NO";
+    noButton.textContent = "I will do it later";
     noButton.style.cssText = `
           color: white;
           font-size: 14px;
@@ -59,7 +69,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
           border-radius: 4px;
           cursor: pointer;
     `;
-    snackbar.appendChild(noButton);
+    buttonContainer.appendChild(noButton);
 
     // When close snackbar, it sends log data to service worker.
     const closeSnackbar = (answer) => {
@@ -118,8 +128,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       snackbar.remove();
     };
 
-    yesButton.onclick = () => closeSnackbar("YES");
-    noButton.onclick = () => closeSnackbar("NO");
+    yesButton.onclick = () => closeSnackbar("Let's fact-check now");
+    noButton.onclick = () => closeSnackbar("I will do it later");
+
+    snackbar.appendChild(buttonContainer);
     // Snackbar Injection to DOM
     document.body.appendChild(snackbar);
   } else if (message.action === "updateStyle") {

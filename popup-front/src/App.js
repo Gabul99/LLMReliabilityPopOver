@@ -4,18 +4,21 @@ import MessageManager from "./message/MessageManager";
 import { useEffect, useState } from "react";
 
 function App() {
-  const [text, setText] = useState("Did you get a reliable answer?");
+  const [text, setText] = useState(
+    "Always verify facts by checking multiple reputable sources for accuracy."
+  );
 
   useEffect(() => {
     const msgManager = new MessageManager();
     msgManager.sendMessageToRuntime({ action: "getCurrentStyle" }, (res) => {
-      const { popoverStyle } = res;
+      const popoverStyle = res;
+      console.log("UseEffect", popoverStyle);
       console.log(
         "Popover Style",
-        popoverStyle.popoverStyle.backgroundColor,
-        popoverStyle.popoverStyle.popoverText
+        popoverStyle.backgroundColor,
+        popoverStyle.popoverText
       );
-      setText(popoverStyle.popoverStyle.popoverText);
+      setText(popoverStyle.popoverText);
     });
   }, []);
 
