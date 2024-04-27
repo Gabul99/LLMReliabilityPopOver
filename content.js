@@ -72,7 +72,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     buttonContainer.appendChild(noButton);
 
     // When close snackbar, it sends log data to service worker.
-    const closeSnackbar = (answer) => {
+    const closeSnackbar = (text, answer) => {
       if (site === "Gemini") {
         const modelTurns = Array.from(
           document.querySelectorAll('[id^="message-content-id-"]')
@@ -93,6 +93,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
               site,
               time: new Date().toISOString(),
               turns: recentTurns,
+              text,
             },
           },
           undefined,
@@ -119,6 +120,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
               site,
               time: new Date().toISOString(),
               turns: recentTurns,
+              text,
             },
           },
           undefined,
@@ -128,8 +130,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       snackbar.remove();
     };
 
-    yesButton.onclick = () => closeSnackbar("Let's fact-check now");
-    noButton.onclick = () => closeSnackbar("I will do it later");
+    yesButton.onclick = () =>
+      closeSnackbar(innerStatement.textContent, "Let's fact-check now");
+    noButton.onclick = () =>
+      closeSnackbar(innerStatement.textContent, "I will do it later");
 
     snackbar.appendChild(buttonContainer);
     // Snackbar Injection to DOM
