@@ -7,9 +7,15 @@ function colorTag(colorName) {
   }
 }
 
+function playSound() {
+  const audio = new Audio(chrome.runtime.getURL("sound.mp3"));
+  audio.play();
+}
+
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   console.log("Get message", message.action);
   if (message.action === "showSnackbar") {
+    playSound();
     const site = message.site;
     const { backgroundColor, popoverText } = message.style;
     const colorHashCode = colorTag(backgroundColor);
