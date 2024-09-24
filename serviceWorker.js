@@ -24,7 +24,11 @@ initialize(() => {});
 chrome.webRequest.onCompleted.addListener(
   async function (details) {
     // check this request from ChatGPT
-    if (details.initiator && details.initiator.includes("openai.com")) {
+    if (
+      details.initiator &&
+      (details.initiator.includes("openai.com") ||
+        details.initiator.includes("chatgpt.com"))
+    ) {
       if (details.url.endsWith("backend-api/conversation")) {
         console.log("Send Message!");
         setTimeout(

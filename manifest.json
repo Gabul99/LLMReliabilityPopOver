@@ -27,7 +27,11 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://chat.openai.com/c/*", "*://gemini.google.com/app/*"],
+      "matches": [
+        "*://chat.openai.com/c/*",
+        "*://gemini.google.com/app/*",
+        "*://chatgpt.com/c/*"
+      ],
       "js": ["content.js"]
     }
   ],
